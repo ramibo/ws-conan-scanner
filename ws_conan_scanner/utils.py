@@ -45,7 +45,7 @@ def create_logger(args):
     from logging.handlers import RotatingFileHandler
     from pathlib import Path
     from ws_conan_scanner._version import __tool_name__
-    from conan_scanner import DATE_TIME_NOW
+    from ws_conan_scanner.conan_scanner import DATE_TIME_NOW
     import os
 
     logger = logging.getLogger(__tool_name__)

@@ -90,7 +90,7 @@ def map_all_dependencies(config):
 
         dry_build = '--dry-build' if config.include_build_requires_packages else ''
 
-        output = execute_command(f"conan info {config.project_path} --paths {dry_build} --json {deps_json_file}")
+        output = execute_command(f"conan info {config.install_ref} --paths {dry_build} --json {deps_json_file}")
 
         logger.info(f'\n{output}')  # Todo add print of deps.json
 
@@ -108,7 +108,7 @@ def run_conan_install_command(config):
     """ Allocate the scanned project dependencies in the conanInstallFolder"""
     try:
         logger.info(f"conanRunPreStep={config.conan_run_pre_step}")
-        execute_command(f"conan install {config.project_path} --install-folder {config.temp_dir} --build --profile:build {config.conan_profile_name}")
+        execute_command(f"conan install {config.install_ref} --install-folder {config.temp_dir} --build --profile:build {config.conan_profile_name}")
         logger.info(f"installation completed , install folder : {config.temp_dir}")
     except subprocess.CalledProcessError as e:
         logger.error(e.output.decode())
@@ -154,7 +154,6 @@ def get_dependencies_from_download_source(config, source_folders_missing, conan_
 
             try:
                 execute_command(conan_install_command)
-
                 execute_command(conan_source_command)
 
                 packages_l.append(package_directory)
@@ -410,7 +409,7 @@ def change_project_source_file_inventory_match(config, conan_deps):
             try:
                 conf.ws_conn.change_origin_of_source_lib(lib_uuid=key_uuid,
                                                          source_files_sha1=sha_ones,
-                                                         user_comments=f"Source files changed by Whitesource conan scan_{conf.date_time_now}")
+                                                         user_comments=f"Source files changed by Mend conan scan_{conf.date_time_now}")
             except ws_sdk.ws_errors.WsSdkServerGenericError as e:
                 # logger.warning(e)
                 pass
@@ -421,12 +420,13 @@ def change_project_source_file_inventory_match(config, conan_deps):
 
         logger.info(f"Total {sha_ones_count} source files were remapped to the correct libraries.")
 
+    # this phase is to reduce source files which were matched based on path+download link but contained another package name in its path.
     def get_project_source_files_inventory_to_remap_third_phase(proj_sf_map_second_ph):
         project_sf_inventory_to_remap_third_phase = []
         for source_file in proj_sf_map_second_ph:
             if not source_file.get('accurate_match'):
                 if not source_file.get('need_to_remap'):
-                    if source_file['sc_counter'] < 2:  # this check is to reduce source files which were matched based on path+download link but contained another package name in its path.
+                    if source_file['sc_counter'] < 2:
                         project_sf_inventory_to_remap_third_phase.append(source_file)
                     else:
                         pass
@@ -492,7 +492,7 @@ def change_project_source_file_inventory_match(config, conan_deps):
                                                                                                                      cn_deps=conan_deps)  # Todo check bzip2
 
         ####
-        # Changing mis-mapped source files to optional library based on conan download url with global search
+
         counter = 0
         packages_dict_by_package_full_name = convert_dict_list_to_dict(lst=conan_deps, key_desc='package_full_name')
 
@@ -504,14 +504,16 @@ def change_project_source_file_inventory_match(config, conan_deps):
                 try:
                     config.ws_conn.change_origin_of_source_lib(lib_uuid=packages_dict_by_package_full_name[package]['key_uuid'],
                                                                source_files_sha1=sha1s,
-                                                               user_comments='Source files changed by Whitesource conan scan_' + config.date_time_now)
+                                                               user_comments='Source files changed by Mend conan scan_' + config.date_time_now)
                 except ws_sdk.ws_errors.WsSdkServerGenericError as e:
                     # logger.warning(e)
                     pass
                 no_match = False
                 counter += 1
-                logger.info(f"--{counter}/{len(remaining_conan_local_packages_and_source_files_sha1)} libraries were matched ( {len(sha1s)} mis-configured source files from {package} conan package were matched to WS source library )")
+                logger.info(f"--{counter}/{len(remaining_conan_local_packages_and_source_files_sha1)} libraries were matched "
+                            f"( {len(sha1s)} mis-configured source files from {package} conan package were matched to Mend source library )")
             ####
+            # Changing mis-mapped source files to optional library based on conan download url with global search
             else:
                 logger.info(f"Trying match the remaining miss configured source files of {package} with global search")
                 library_name = package.partition('-')[0]
@@ -532,13 +534,15 @@ def change_project_source_file_inventory_match(config, conan_deps):
                     try:
                         config.ws_conn.change_origin_of_source_lib(lib_uuid=library_key_uuid,
                                                                    source_files_sha1=sha1s,
-                                                                   user_comments='Source files changed by Whitesource conan scan_' + config.date_time_now)
+                                                                   user_comments='Source files changed by Mend conan scan_' + config.date_time_now)
                     except ws_sdk.ws_errors.WsSdkServerGenericError as e:
                         # logger.warning(e)
                         pass
                     no_match = False
                     counter += 1
-                    logger.info(f"--{counter}/{len(remaining_conan_local_packages_and_source_files_sha1)} libraries were matched ( {len(sha1s)} mis-configured source files from {package} conan package were matched to {source_libraries_dict_from_search_by_download_link[check_url]['filename']} WS source library )")
+                    logger.info(f"--{counter}/{len(remaining_conan_local_packages_and_source_files_sha1)} libraries were matched "
+                                f"( {len(sha1s)} mis-configured source files from {package} conan package were matched to "
+                                f"{source_libraries_dict_from_search_by_download_link[check_url]['filename']} WS source library )")
 
                 else:
                     logger.info(f"Match was not found by global search for miss configured source files of {package}")
@@ -564,7 +568,7 @@ def change_project_source_file_inventory_match(config, conan_deps):
                                 try:
                                     config.ws_conn.change_origin_of_source_lib(lib_uuid=library_key_uuid,
                                                                                source_files_sha1=sha1s_final,
-                                                                               user_comments='Source files changed by Whitesource conan scan_' + config.date_time_now)
+                                                                               user_comments='Source files changed by Mend conan scan_' + config.date_time_now)
                                 except ws_sdk.ws_errors.WsSdkServerGenericError as e:
                                     # logger.warning(e)
                                     pass
@@ -618,9 +622,16 @@ def remove_previous_run_temp_folder(conf):
         remove_folder(pattern)
 
 
-def get_source_files_from_conan_main_package(config):
+def get_source_files_from_conan_main_package_recepie(config):
     if config.is_conanfilepy:
         execute_command(f"conan source {config.project_path} --source-folder {config.temp_dir}")
+
+
+def run_additional_commands(config):
+
+    for command in config.additional_commands:
+        execute_command(command)
+
 
 
 def main():
@@ -639,6 +650,9 @@ def main():
     # Get Conan profile details
     map_conan_profile_values(config)
 
+    #Run additionalCommands
+    run_additional_commands(config)
+
     # Check for conanfile in the scanned project
     validate_project_manifest_file_exists(config)
 
@@ -649,9 +663,9 @@ def main():
     if config.conan_run_pre_step:
         run_conan_install_command(config)
 
-    # Get source files from the main package
-    if config.resolve_conan_main_package:
-        get_source_files_from_conan_main_package(config)
+    # Get source files from the main package via conanfily.py source method
+    if config.resolve_conan_main_package and not config.conan_main_package:
+        get_source_files_from_conan_main_package_recepie(config)
 
     dirs_to_scan = [config.project_path]
 

@@ -90,7 +90,7 @@ def map_all_dependencies(config):
 
         dry_build = '--dry-build' if config.include_build_requires_packages else ''
 
-        output = execute_command(f"conan info {config.install_ref} --paths {dry_build} --json {deps_json_file}")
+        output = execute_command(f"conan info {config.install_ref} --paths {dry_build} --json {deps_json_file} --profile {config.conan_profile_name}")
 
         logger.info(f'\n{output}')  # Todo add print of deps.json
 
@@ -108,7 +108,7 @@ def run_conan_install_command(config):
     """ Allocate the scanned project dependencies in the conanInstallFolder"""
     try:
         logger.info(f"conanRunPreStep={config.conan_run_pre_step}")
-        execute_command(f"conan install {config.install_ref} --install-folder {config.temp_dir} --build --profile:build {config.conan_profile_name}")
+        execute_command(f"conan install {config.install_ref} --install-folder {config.temp_dir} --build --profile {config.conan_profile_name}")
         logger.info(f"installation completed , install folder : {config.temp_dir}")
     except subprocess.CalledProcessError as e:
         logger.error(e.output.decode())
@@ -149,7 +149,7 @@ def get_dependencies_from_download_source(config, source_folders_missing, conan_
             install_version = deps_l_d.get(item).get('reference')
             if '@' not in install_version:
                 install_version = install_version + '@'
-            conan_install_command = f"conan install --install-folder {package_directory} {export_folder} {install_version} --profile:build {config.conan_profile_name}"
+            conan_install_command = f"conan install --install-folder {package_directory} {export_folder} {install_version} --profile {config.conan_profile_name}"
             conan_source_command = f"conan source --source-folder {package_directory} --install-folder {package_directory} {export_folder}"
 
             try:

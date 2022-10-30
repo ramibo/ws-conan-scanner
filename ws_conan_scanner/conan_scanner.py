@@ -33,13 +33,16 @@ logger = LoggerFactory.get_logger()
 
 def is_conan_installed():
     """ Validate conan is installed by retrieving the Conan home directory"""
-    conan_version = execute_command('conan --version')
+    try:
+        conan_version = execute_command('conan --version')
 
-    if 'Conan version' in conan_version:
-        logger.info(f"Conan identified - {conan_version} ")
-    else:
-        logger.error(f"Please check Conan is installed and configured properly ")
-        sys.exit(1)
+        if 'Conan version' in conan_version:
+            logger.info(f"Conan identified - {conan_version} ")
+        else:
+            logger.error(f"Please check Conan is installed and configured properly ")
+            sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        logger.error(e.output.decode())
 
 
 def map_conan_profile_values(conf):
@@ -555,7 +558,7 @@ def change_project_source_file_inventory_match(config, conan_deps):
                         result = all(elem in list1 for elem in list2)
 
                         if result and library.get('type') == 'SOURCE_LIBRARY':
-                            logger.info(f"A match was found by name for conan pakcage {package} : to-->{library.get('filename')}")
+                            logger.info(f"A match was found by name for conan pakcage {package} : with Mend library-->{library.get('filename')}")
                             library_key_uuid = library.get('keyUuid')
                             sha1s_final = []
 
@@ -623,15 +626,20 @@ def remove_previous_run_temp_folder(conf):
 
 
 def get_source_files_from_conan_main_package_recepie(config):
-    if config.is_conanfilepy:
-        execute_command(f"conan source {config.project_path} --source-folder {config.temp_dir}")
+    try:
+        if config.is_conanfilepy:
+            execute_command(f"conan source {config.project_path} --source-folder {config.temp_dir}")
+    except subprocess.CalledProcessError as e:
+        logger.error(e.output.decode())
 
 
 def run_additional_commands(config):
-
     for command in config.additional_commands:
-        execute_command(command)
+        try:
+            execute_command(command)
 
+        except subprocess.CalledProcessError as e:
+            logger.error(e.output.decode())
 
 
 def main():
@@ -650,7 +658,7 @@ def main():
     # Get Conan profile details
     map_conan_profile_values(config)
 
-    #Run additionalCommands
+    # Run additionalCommands
     run_additional_commands(config)
 
     # Check for conanfile in the scanned project

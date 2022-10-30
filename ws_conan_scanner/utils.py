@@ -80,13 +80,13 @@ def str2bool(v):
 
 
 def execute_command(command):
-    try:
-        utils_logger.info(f"Going to run the following command :\n{command}")
-        output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT).decode()
-        utils_logger.info(output)
-        return output
-    except subprocess.CalledProcessError as e:
-        utils_logger.error(e.output.decode())
+    # try:
+    utils_logger.info(f"Going to run the following command :\n{command}")
+    output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT).decode()
+    utils_logger.info(output)
+    return output
+    # except subprocess.CalledProcessError as e:
+    #     utils_logger.error(e.output.decode())
 
 
 class LoggerFactory(object):
@@ -158,7 +158,7 @@ class ConfigurationFactory(object):
             optional = parser.add_argument_group('optional arguments')
             ua_prod_proj = parser.add_argument_group('Unified Agent Product / Project')
 
-            optional.add_argument('-q', "--" + ADDITIONAL_COMMANDS, help="List of additional commands to run", dest='additional_commands',type=str, required=False, default=ADDITIONAL_COMMANDS_DEFAULT, nargs='+')
+            optional.add_argument('-q', "--" + ADDITIONAL_COMMANDS, help="List of additional commands to run", dest='additional_commands', type=str, required=False, default=ADDITIONAL_COMMANDS_DEFAULT, nargs='+')
             optional.add_argument('-s', "--" + KEEP_CONAN_INSTALL_FOLDER_AFTER_RUN, help="keep the install folder after run", dest='keep_conan_install_folder_after_run', required=False, default=KEEP_CONAN_INSTALL_FOLDER_AFTER_RUN_DEFAULT, type=str2bool)
             optional.add_argument('-b', "--" + INCLUDE_BUILD_REQUIRES_PACKAGES, help="If ture , list conan packages with conan info /path/to/conanfile --paths --dry-build.", type=str2bool, required=False, default=INCLUDE_BUILD_REQUIRES_PACKAGES_DEFAULT, dest='include_build_requires_packages')
             optional.add_argument('-p', "--" + CONAN_RUN_PRE_STEP, help="run conan install --build", dest='conan_run_pre_step', required=False, default=CONAN_RUN_PRE_STEP_DEFAULT, type=str2bool)

@@ -368,7 +368,10 @@ def change_project_source_file_inventory_match(config, conan_deps):
                 source_file['sc_counter'] = 0  # Debug
                 source_file['source_lib_full_name'] = source_file['library']['artifactId'] + '-' + source_file['library']['version']
                 # Add Download link to source file
-                source_file['download_link'] = due_diligence_d.get(source_file['source_lib_full_name']).get('download_link')
+                try:
+                    source_file['download_link'] = due_diligence_d.get(source_file['source_lib_full_name']).get('download_link')
+                except AttributeError as error:
+                    logger.error(f"error for {source_file['source_lib_full_name']}")
             else:
                 source_file['sc_counter'] = 0  # Debug
                 source_file['source_lib_full_name'] = source_file['library']['artifactId'] + '-' + source_file['library']['version']

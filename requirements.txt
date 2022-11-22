@@ -1,7 +1,7 @@
-setuptools~=57.0.0
+setuptools~=65.6.0
 requests~=2.27.0
-configparser~=5.0.2
+configparser~=5.3.0
 DateTime~=4.3
-PyYAML~=5.4.1
+PyYAML~=6.0.0
 ws-sdk~=22.8.4.2
 urllib3~=1.26.7

@@ -1,6 +1,5 @@
 import unittest
-from unittest import mock
-from ws_conan_scanner import conan_scanner, utils
+from ws_conan_scanner import conan_scanner
 
 
 class TestConanScanner(unittest.TestCase):

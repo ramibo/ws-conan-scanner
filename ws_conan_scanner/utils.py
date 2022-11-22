@@ -43,8 +43,8 @@ CONAN_PROFILE_NAME = 'conanProfileName'
 CONAN_PROFILE_NAME_DEFAULT = 'default'
 CONAN_MAIN_PACKAGE = 'conanMainPackage'
 CONAN_MAIN_PACKAGE_DEFAULT = None
-RESOLVE_CONAN_MAIN_PACKAGE = 'resolveConanMainPackage'
-RESOLVE_CONAN_MAIN_PACKAGE_DEFAULT = True
+RESOLVE_CONANFILE_MAIN_PACKAGE = 'resolveConanfileMainPackage'
+RESOLVE_CONANFILE_MAIN_PACKAGE_DEFAULT = True
 WS_URL = 'wsUrl'
 LOG_FILE_PATH = 'logFilePath'
 
@@ -165,8 +165,8 @@ class ConfigurationFactory(object):
             optional.add_argument('-g', "--" + CHANGE_ORIGIN_LIBRARY, help="True will attempt to match libraries per package name and version", dest='change_origin_library', required=False, default=CHANGE_ORIGIN_LIBRARY_DEFAULT, type=str2bool)
             optional.add_argument('-f', "--" + CONAN_PROFILE_NAME, help="The name of the conan profile", dest='conan_profile_name', required=False, default=CONAN_PROFILE_NAME_DEFAULT)
             optional.add_argument('-m', "--" + CONAN_MAIN_PACKAGE, help="Include the package_name/package_version@user/channel of the project's conanfile package", dest='conan_main_package', required=False, default=CONAN_MAIN_PACKAGE_DEFAULT)
-            optional.add_argument('-r', "--" + RESOLVE_CONAN_MAIN_PACKAGE, help="Retrieve and scan the source files of conanfile.py recipe main package via source method",
-                                  dest='resolve_conan_main_package', required=False, default=RESOLVE_CONAN_MAIN_PACKAGE_DEFAULT, type=str2bool)
+            optional.add_argument('-r', "--" + RESOLVE_CONANFILE_MAIN_PACKAGE, help="Retrieve and scan the source files of conanfile.py recipe main package via source method",
+                                  dest='resolve_conanfile_main_package', required=False, default=RESOLVE_CONANFILE_MAIN_PACKAGE_DEFAULT, type=str2bool)
             required.add_argument('-u', '--' + WS_URL, help='The Mend organization url', required=True, dest='ws_url')
             required.add_argument('-k', '--' + USER_KEY, help='The admin user key', required=True, dest='user_key')
             required.add_argument('-t', '--' + ORG_TOKEN, help='The organization token', required=True, dest='org_token')

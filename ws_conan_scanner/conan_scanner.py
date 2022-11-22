@@ -396,11 +396,11 @@ def change_project_source_file_inventory_match(config, conan_deps):
                         project_sf_inventory_to_remap_second_phase.append(source_file)
                         missing_sf_counter_is_not_index_key_uuid += 1
             if pkg['counter'] > 0:
-                logger.info(f"for {pkg['package_full_name']} conan package: {pkg['counter']} source files are mapped to the correct library ({project_inventory_d_by_download_link.get(pkg['conandata_yml_download_url'])['filename']}) in {org_name}")
+                logger.info(f"for {pkg['package_full_name']} conan package: {pkg['counter']} source files are mapped to the correct library ({project_inventory_d_by_download_link.get(pkg['conandata_yml_download_url'])['filename']}) in {org_n}")
             else:
-                logger.info(f"for {pkg['package_full_name']} conan package: {pkg['counter']} source files are mapped to the correct library in {org_name}")
+                logger.info(f"for {pkg['package_full_name']} conan package: {pkg['counter']} source files are mapped to the correct library in {org_n}")
         missing_sf_counter = missing_sf_counter_is_index_key_uuid + missing_sf_counter_is_not_index_key_uuid
-        logger.info(f"There are {missing_sf_counter} source files that can be re-mapped to the correct conan source library in {org_name}")
+        logger.info(f"There are {missing_sf_counter} source files that can be re-mapped to the correct conan source library in {org_n}")
         return project_sf_inventory_to_remap_second_phase, libraries_key_uuid_and_sf_sha1
 
     def project_source_files_remap_first_phase(conf, libraries_key_uuid_and_sf_sha1, proj_token, org_n):
@@ -625,7 +625,7 @@ def remove_previous_run_temp_folder(conf):
         remove_folder(pattern)
 
 
-def get_source_files_from_conan_main_package_recepie(config):
+def get_source_files_from_conanfile_main_package_recepie(config):
     try:
         if config.is_conanfilepy:
             execute_command(f"conan source {config.project_path} --source-folder {config.temp_dir}")
@@ -662,7 +662,8 @@ def main():
     run_additional_commands(config)
 
     # Check for conanfile in the scanned project
-    validate_project_manifest_file_exists(config)
+    if not config.conan_main_package:
+        validate_project_manifest_file_exists(config)
 
     # Get the conan project dependencies
     conan_dependencies = map_all_dependencies(config)
@@ -672,8 +673,8 @@ def main():
         run_conan_install_command(config)
 
     # Get source files from the main package via conanfily.py source method
-    if config.resolve_conan_main_package and not config.conan_main_package:
-        get_source_files_from_conan_main_package_recepie(config)
+    if config.resolve_conanfile_main_package and not config.conan_main_package:
+        get_source_files_from_conanfile_main_package_recepie(config)
 
     dirs_to_scan = [config.project_path]
 

@@ -290,7 +290,7 @@ def scan_with_unified_agent(config, dirs_to_scan):
             time.sleep(20.0)
 
 
-def update_conandta_yml_download_url_from_ws_index(config, conan_deps):
+def update_conandata_yml_download_url_from_ws_index(config, conan_deps):
     def sync_ws_org_with_conan_source_library_from_the_index(conf, index_package):
         from ws_sdk.ws_errors import WsSdkClientGenericError
         try:
@@ -696,8 +696,8 @@ def main():
         dirs_to_scan.append(item)
 
     # Adding {'conandata_yml_download_url':url} dictionary for each conan package and aligning with ws index convention
-    update_conandta_yml_download_url_from_ws_index(config=config,
-                                                   conan_deps=conan_dependencies)
+    update_conandata_yml_download_url_from_ws_index(config=config,
+                                                    conan_deps=conan_dependencies)
 
     # Scan project
     scan_with_unified_agent(config=config,

@@ -13,6 +13,7 @@ from pathlib import Path
 
 import requests
 import urllib3
+from urllib3 import exceptions
 import ws_sdk
 import yaml
 from ws_sdk.ws_constants import UAArchiveFiles
@@ -217,10 +218,14 @@ def download_source_package(source, directory, package_full_name):
                                               package=package_full_name)
         if url:
             r = requests.get(url, allow_redirects=True, headers={'Cache-Control': 'no-cache'})
+            r.raise_for_status()
             with open(os.path.join(directory, os.path.basename(url)), 'wb') as b:
                 b.write(r.content)
                 logger.info(f"{package_full_name} source files were retrieved from {source} and saved at {directory} ")
                 return directory
+
+    except requests.exceptions.HTTPError as e:
+        logger.error(f'{general_text}\nGeneral requests error: {e.response} ERROR')
     except urllib3.exceptions.ProtocolError as e:
         logger.error(f'{general_text}\nGeneral requests error: ' + str(e.__traceback__))
     except requests.exceptions.ConnectionError as e:
@@ -232,7 +237,9 @@ def download_source_package(source, directory, package_full_name):
     except requests.exceptions.InvalidURL as e:
         logger.error(f'{general_text}\nThe url retrieved from conandata.yml is Invalid: ' + e.response.text)
     except requests.exceptions.Timeout as e:
-        logger.error(f'{general_text}\nGot requests Timeout: ' + e.response.text)
+        logger.error(f'{general_text}\nGot requests Timeout: ' + str(e.__traceback__))
+    except requests.exceptions.TooManyRedirects as e:
+        logger.error(f'{general_text}\nTo many redirects: ' + str(e.__traceback__))
     except requests.exceptions.RequestException as e:
         logger.error(f'{general_text}\nGeneral requests error: ' + e.response.text)
 

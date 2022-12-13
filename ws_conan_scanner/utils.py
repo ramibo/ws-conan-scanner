@@ -143,7 +143,18 @@ class LoggerFactory(object):
         return logger
 
 
-class ConfigurationFactory(object):
+def singleton(class_instance):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if class_instance not in instances:
+            instances[class_instance] = class_instance(*args, **kwargs)
+        return instances[class_instance]
+
+    return get_instance
+
+
+class ConfigurationFactory(object):  # Todo - change pattern to singleton
     _CONF = None
 
     @staticmethod
